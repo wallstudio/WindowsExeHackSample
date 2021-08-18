@@ -9,10 +9,6 @@
 #include <format>
 #include <map>
 
-// https://snoozy.hatenablog.com/entry/2020/03/28/001631
-// https://qiita.com/cha1aza/items/f64dc4351517a2477ef1
-// https://tech.blog.aerie.jp/entry/2016/01/13/013206
-
 typedef struct Entry
 {
     ULONG NextEntryOffset;
@@ -111,6 +107,12 @@ BOOL WINAPI DllMain(HMODULE hModule, DWORD reason, LPVOID _)
     // TaskManagerに寄生して、ntdll.dllのIATのNtQuerySystemInformationを書き換えて以下のいたずらをする
     // - notepad.exeを隠蔽
     // - プロセスのImage名をリバース
+
+    // このcppをデバッグする際には、VSをTaskManagerにアタッチした状態で、DllInjector.exeを管理者権限で実行する
+
+    // https://snoozy.hatenablog.com/entry/2020/03/28/001631
+    // https://qiita.com/cha1aza/items/f64dc4351517a2477ef1
+    // https://tech.blog.aerie.jp/entry/2016/01/13/013206
 
     if (reason == DLL_PROCESS_ATTACH)
     {
