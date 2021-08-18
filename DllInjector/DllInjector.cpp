@@ -69,8 +69,8 @@ int main()
 
     try
     {
-        auto target = FindProcess(L".*notepad.*");
-        InjectDll(target, L"ParasiteDll.dll");
+        auto target = FindProcess(L".*Taskmgr.exe");
+        InjectDll(target, L"TaskMangerHackDll.dll");
     }
     catch (std::exception& e)
     {
