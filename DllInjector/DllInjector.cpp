@@ -70,7 +70,7 @@ int main()
     try
     {
         auto target = FindProcess(L".*Taskmgr.exe");
-        InjectDll(target, L"TaskMangerHackDll.dll");
+        InjectDll(target, L"HackImportAddressTable.dll");
     }
     catch (std::exception& e)
     {

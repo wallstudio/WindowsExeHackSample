@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.31605.320
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DllInjector", "DllInjector\DllInjector.vcxproj", "{246179B7-E94F-4760-9B56-6C6F1110F5D8}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TaskMangerHackDll", "TaskMangerHackDll\TaskMangerHackDll.vcxproj", "{C83089F5-5928-4F31-8BD5-B6AF7B6C2BFA}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HackImportAddressTable", "HackImportAddressTable\HackImportAddressTable.vcxproj", "{C83089F5-5928-4F31-8BD5-B6AF7B6C2BFA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
