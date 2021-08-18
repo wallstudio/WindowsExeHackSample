@@ -69,8 +69,18 @@ int main()
 
     try
     {
-        auto target = FindProcess(L".*Taskmgr.exe");
-        InjectDll(target, L"HackImportAddressTable.dll");
+        auto cmd = std::wstring();
+        std::wcin >> cmd;
+        if (cmd == L"iat")
+        {
+            auto target = FindProcess(L".*Taskmgr.exe");
+            InjectDll(target, L"HackImportAddressTable.dll");
+        }
+        else if (cmd == L"mem")
+        {
+            auto target = FindProcess(L".*notepad.exe");
+            InjectDll(target, L"HackVirtualMemory.dll");
+        }
     }
     catch (std::exception& e)
     {
