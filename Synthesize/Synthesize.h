@@ -200,16 +200,18 @@ namespace Synthesize
 		return (T)GetProcAddress(original, name.c_str());
 	}
 
-	inline void PcmToWave(std::vector<std::byte>& pcm, std::vector<std::byte>& wave)
+	inline std::vector<std::byte> PcmToWave(std::vector<short>& pcm)
 	{
+		auto dataSize = pcm.size() * sizeof(short);
 		auto header = Wave
 		{
-			.size = (std::uint32_t)(sizeof(Wave::FileHeader) + sizeof(Wave::DataHeader) + pcm.size()),
-			.dataHeader = Wave::DataHeader {.size = (std::uint32_t)pcm.size() },
+			.size = (std::uint32_t)(sizeof(Wave::FileHeader) + sizeof(Wave::DataHeader) + dataSize),
+			.dataHeader = Wave::DataHeader {.size = (std::uint32_t)dataSize },
 		};
-		wave = std::vector<std::byte>(sizeof(Wave) + pcm.size());
+		auto wave = std::vector<std::byte>(sizeof(Wave) + dataSize);
 		memcpy(wave.data(), &header, sizeof(Wave));
-		memcpy(wave.data() + sizeof(Wave), pcm.data(), pcm.size());
+		memcpy(wave.data() + sizeof(Wave), pcm.data(), dataSize);
+		return wave;
 	}
 
 	inline AIAudioResultCode AIAudioAPI_DeviceInfo(LPCSTR guid, LPCSTR name, std::int32_t bufferLen, std::int32_t& requireLen)

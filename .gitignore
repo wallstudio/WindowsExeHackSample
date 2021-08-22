@@ -396,4 +396,4 @@ FodyWeavers.xsd
 # JetBrains Rider
 .idea/
 *.sln.iml
-Synthesize/Extract/Extractor.cs
+Synthesize/Extract*

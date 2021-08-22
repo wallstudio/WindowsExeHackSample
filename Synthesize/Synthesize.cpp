@@ -10,6 +10,18 @@
 #include "Synthesize.h"
 
 
+void Check(Synthesize::AITalkResultCode status)
+{
+	if (status != Synthesize::AITalkResultCode::AITALKERR_SUCCESS)
+		throw status;
+}
+
+void Check(Synthesize::AIAudioResultCode status)
+{
+	if (status != Synthesize::AIAudioResultCode::AIAUDIOERR_SUCCESS)
+		throw status;
+}
+
 std::string GetSeed()
 {
     auto random = std::random_device();
@@ -25,11 +37,6 @@ std::string GetSeed()
     std::filesystem::remove(tmpFile);
 
 	return std::regex_replace(srcBuff.data(), std::regex("\\n"), "");
-}
-
-void Check(Synthesize::AITalkResultCode status)
-{
-	if (status != Synthesize::AITalkResultCode::AITALKERR_SUCCESS) throw status;
 }
 
 int main()
@@ -48,29 +55,32 @@ int main()
 			.codeAuthSeed = seed.c_str(),
 			.__reserved__ = 0,
 		};
+		Check(AITalkAPI_End());
 		Check(AITalkAPI_Init(config));
 		Check(AITalkAPI_LangLoad("C:\\Program Files (x86)\\AHS\\VOICEROID2\\Lang\\standard"));
+		Check(AITalkAPI_ReloadPhraseDic("C:\\Users\\huser\\Documents\\VOICEROID2\\フレーズ辞書\\user.pdic"));
+		Check(AITalkAPI_ReloadWordDic("C:\\Users\\huser\\Documents\\VOICEROID2\\単語辞書\\user.wdic"));
+		Check(AITalkAPI_ReloadSymbolDic("C:\\Users\\huser\\Documents\\VOICEROID2\\記号ポーズ辞書\\user.sdic"));
 		Check(AITalkAPI_VoiceLoad("tamiyasu_44"));
-		auto params = AITalk_TTtsParam{ .size = sizeof(AITalk_TTtsParam), };
-		Check(AITalkAPI_GetParam(params, params.size));
-		Check(AITalkAPI_SetParam(params));
+		//auto params = AITalk_TTtsParam{ .size = sizeof(AITalk_TTtsParam), };
+		//Check(AITalkAPI_GetParam(params, params.size));
+		//Check(AITalkAPI_SetParam(params));
 
 		int job = 0;
 		AITalk_TJobParam jobParam;
 
-		jobParam = AITalk_TJobParam{ .modeInOut = AITalkJobInOut::AITALKIOMODE_PLAIN_TO_AIKANA };
-		Check(AITalkAPI_TextToKana(job, jobParam, "アフリカ王立学院"));
-		return 0;
-
 		auto kanaBuff = std::vector<char>(2048);
 		std::uint32_t req, prop;
+		jobParam = AITalk_TJobParam{ .modeInOut = AITalkJobInOut::AITALKIOMODE_PLAIN_TO_AIKANA };
+		Check(AITalkAPI_TextToKana(job, jobParam, "アフリカ王立学院"));
 		Check(AITalkAPI_GetKana(job, kanaBuff.data(), kanaBuff.size(), req, prop));
+		Check(AITalkAPI_CloseKana(job, 0));
 		auto kana = std::string(kanaBuff.data());
 
 		jobParam = AITalk_TJobParam{ .modeInOut = AITalkJobInOut::AITALKIOMODE_AIKANA_TO_WAVE };
 		Check(AITalkAPI_TextToSpeech(job, jobParam, kana.c_str()));
 		auto pcm = std::vector<short>();
-		auto pcmBuff = std::array<short, 1024>();
+		auto pcmBuff = std::array<short, 128 * 1024>();
 		for (auto result = AITalkResultCode::AITALKERR_SUCCESS; result == AITalkResultCode::AITALKERR_SUCCESS;)
 		{
 			std::uint32_t written = 0;
@@ -78,13 +88,8 @@ int main()
 			pcm.insert(pcm.end(), pcmBuff.begin(), pcmBuff.begin() + written);
 		}
 
-		auto bin = std::vector<std::byte>(pcm.size() * sizeof(short));
-		memcpy(bin.data(), pcm.data(), bin.size());
-		auto filep = std::ofstream("C:\\Users\\huser\\Desktop\\b.pcm");
-		filep.write((char*)bin.data(), bin.size());
-		auto file = std::ofstream("C:\\Users\\huser\\Desktop\\b.wav");
-		auto wave = std::vector<std::byte>();
-		PcmToWave(bin, wave);
+		auto wave = PcmToWave(pcm);
+		auto file = std::ofstream("C:\\Users\\huser\\Desktop\\b.wav", std::ios_base::binary | std::ios_base::out);
 		file.write((char*)wave.data(), wave.size());
 	}
 	catch (AITalkResultCode code)
