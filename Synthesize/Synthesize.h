@@ -193,11 +193,21 @@ namespace Synthesize
 	};
 #pragma pack()
 
-	template<typename T>
-	inline T GetOriginalFunction(std::string name)
+	inline std::string GetSeed()
 	{
-		static auto original = LoadLibraryA("C:\\Program Files\\AHS\\VOICEROID2\\aitalked.dll");
-		return (T)GetProcAddress(original, name.c_str());
+		auto random = std::random_device();
+		auto tmpFile = std::filesystem::temp_directory_path() / std::format("seed_{}", random());
+
+		std::system(std::format("Extract.exe > {}", tmpFile.string().c_str()).c_str());
+		long fileSize = std::filesystem::file_size(tmpFile);
+		auto srcBuff = std::vector<char>(fileSize);
+		{
+			auto sr = std::ifstream(tmpFile);
+			sr.read(srcBuff.data(), fileSize);
+		}
+		std::filesystem::remove(tmpFile);
+
+		return std::regex_replace(srcBuff.data(), std::regex("\\n"), "");
 	}
 
 	inline std::vector<std::byte> PcmToWave(std::vector<short>& pcm)
@@ -212,6 +222,13 @@ namespace Synthesize
 		memcpy(wave.data(), &header, sizeof(Wave));
 		memcpy(wave.data() + sizeof(Wave), pcm.data(), dataSize);
 		return wave;
+	}
+
+	template<typename T>
+	inline T GetOriginalFunction(std::string name)
+	{
+		static auto original = LoadLibraryA("C:\\Program Files\\AHS\\VOICEROID2\\aitalked.dll");
+		return (T)GetProcAddress(original, name.c_str());
 	}
 
 	inline AIAudioResultCode AIAudioAPI_DeviceInfo(LPCSTR guid, LPCSTR name, std::int32_t bufferLen, std::int32_t& requireLen)

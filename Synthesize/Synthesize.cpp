@@ -7,8 +7,9 @@
 #include <random>
 #include <regex>
 #include <codecvt>
+#include <thread>
+#include <chrono>
 #include "Synthesize.h"
-
 
 void Check(Synthesize::AITalkResultCode status)
 {
@@ -22,28 +23,12 @@ void Check(Synthesize::AIAudioResultCode status)
 		throw status;
 }
 
-std::string GetSeed()
-{
-    auto random = std::random_device();
-    auto tmpFile = std::filesystem::temp_directory_path() / std::format("seed_{}", random());
-
-	std::system(std::format("Extract.exe > {}", tmpFile.string().c_str()).c_str());
-    long fileSize = std::filesystem::file_size(tmpFile);
-    auto srcBuff = std::vector<char>(fileSize);
-    {
-        auto sr = std::ifstream(tmpFile);
-        sr.read(srcBuff.data(), fileSize);
-    }
-    std::filesystem::remove(tmpFile);
-
-	return std::regex_replace(srcBuff.data(), std::regex("\\n"), "");
-}
-
 int main()
 {
 	using namespace Synthesize;
 	try
 	{
+		// 初期化
 		auto seed = GetSeed();
 		std::filesystem::current_path("C:\\Program Files\\AHS\\VOICEROID2");
 		auto config = AITalk_TConfig
@@ -62,25 +47,33 @@ int main()
 		Check(AITalkAPI_ReloadWordDic("C:\\Users\\huser\\Documents\\VOICEROID2\\単語辞書\\user.wdic"));
 		Check(AITalkAPI_ReloadSymbolDic("C:\\Users\\huser\\Documents\\VOICEROID2\\記号ポーズ辞書\\user.sdic"));
 		Check(AITalkAPI_VoiceLoad("tamiyasu_44"));
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
 		//auto params = AITalk_TTtsParam{ .size = sizeof(AITalk_TTtsParam), };
 		//Check(AITalkAPI_GetParam(params, params.size));
 		//Check(AITalkAPI_SetParam(params));
 
-		int job = 0;
-		AITalk_TJobParam jobParam;
+		static int job = 0;
+		static AITalk_TJobParam jobParam;
 
+		// 制御文字列へ変換
 		auto kanaBuff = std::vector<char>(2048);
 		std::uint32_t req, prop;
 		jobParam = AITalk_TJobParam{ .modeInOut = AITalkJobInOut::AITALKIOMODE_PLAIN_TO_AIKANA };
 		Check(AITalkAPI_TextToKana(job, jobParam, "アフリカ王立学院"));
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		
 		Check(AITalkAPI_GetKana(job, kanaBuff.data(), kanaBuff.size(), req, prop));
-		Check(AITalkAPI_CloseKana(job, 0));
 		auto kana = std::string(kanaBuff.data());
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
+		// PCMへ変換
 		jobParam = AITalk_TJobParam{ .modeInOut = AITalkJobInOut::AITALKIOMODE_AIKANA_TO_WAVE };
 		Check(AITalkAPI_TextToSpeech(job, jobParam, kana.c_str()));
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
 		auto pcm = std::vector<short>();
-		auto pcmBuff = std::array<short, 128 * 1024>();
+		auto pcmBuff = std::array<short, 1024>();
 		for (auto result = AITalkResultCode::AITALKERR_SUCCESS; result == AITalkResultCode::AITALKERR_SUCCESS;)
 		{
 			std::uint32_t written = 0;
@@ -88,6 +81,7 @@ int main()
 			pcm.insert(pcm.end(), pcmBuff.begin(), pcmBuff.begin() + written);
 		}
 
+		// Waveへ変換
 		auto wave = PcmToWave(pcm);
 		auto file = std::ofstream("C:\\Users\\huser\\Desktop\\b.wav", std::ios_base::binary | std::ios_base::out);
 		file.write((char*)wave.data(), wave.size());
