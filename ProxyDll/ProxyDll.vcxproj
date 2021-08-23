@@ -26,7 +26,6 @@
       <DeploymentContent>false</DeploymentContent>
       <FileType>Document</FileType>
     </MASM>
-    <None Include="link.bat" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -148,6 +147,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
     </Link>
+    <PostBuildEvent>
+      <Command>copy "$(TargetPath)"  "$(ProjectDir)UnityApp\Build\d3d11.dll"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
