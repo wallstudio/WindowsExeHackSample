@@ -1,6 +1,8 @@
 // ビルドの依存関係 > ビルドのカスタマイズ > masm
 // https://docs.microsoft.com/ja-jp/cpp/assembler/masm/masm-for-x64-ml64-exe?view=msvc-160
 
+#pragma managed(push, off)
+
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <vector>
@@ -78,6 +80,43 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 	return TRUE;
 }
 
+#pragma managed(push, on)
+using namespace System;
+using namespace System::Diagnostics;
+using namespace System::Threading;
+using namespace System::Threading::Tasks;
+using namespace System::Reflection;
+using namespace System::Runtime::InteropServices;
+ref class Hook sealed
+{
+public:
+	static void Invoke()
+	{
+		//auto ctc = SynchronizationContext::Current;
+		//auto scheduler = TaskScheduler::FromCurrentSynchronizationContext();
+		Task::Delay(TimeSpan::FromSeconds(3))
+			->ContinueWith(gcnew Action<Task^>(&Callback));
+	}
+
+	static void Callback(Task^ task)
+	{
+		static bool isFirst = true;
+		if (!isFirst) return;
+		isFirst = false;
+
+		auto assemblies = AppDomain::CurrentDomain->GetAssemblies();
+		for (Int32 i = 0; i < assemblies->Length; i++)
+		{
+			auto name = Marshal::StringToCoTaskMemUni(assemblies[i]->FullName);
+			MessageBoxW(nullptr, (wchar_t*)(void*)name, L"ProxyDll", MB_OK);
+			Marshal::FreeCoTaskMem(name);
+		}
+	}
+};
+void Invoke() { Hook::Invoke(); }
+#pragma managed(pop)
+
+// DLLのAPI呼び出しにHookした処理を挟み込む
 extern "C" HRESULT PROXY_D3D11CreateDevice(
 	IDXGIAdapter* pAdapter,
 	D3D_DRIVER_TYPE         DriverType,
@@ -91,7 +130,9 @@ extern "C" HRESULT PROXY_D3D11CreateDevice(
 	ID3D11DeviceContext** ppImmediateContext
 )
 {
-	MessageBoxW(nullptr, L"D3D11CreateDevice", L"ProxyDll", MB_OK);
+	Invoke();
+
+	// 元々の処理もエミュレートする
 	auto base = (decltype(&PROXY_D3D11CreateDevice))p[21];
 	return base(pAdapter, DriverType, Software, Flags, pFeatureLevels, FeatureLevels, SDKVersion, ppDevice, pFeatureLevel, ppImmediateContext);
 }

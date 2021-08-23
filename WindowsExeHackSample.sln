@@ -13,6 +13,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProxyDll", "ProxyDll\ProxyD
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Synthesize", "Synthesize\Synthesize.vcxproj", "{4C9FC899-C1E0-4B6D-9796-2AD0B930A492}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ClassLibrary1", "ClassLibrary1\ClassLibrary1.vcxproj", "{842459D0-FA73-4806-AAD7-034C85EB3643}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +75,16 @@ Global
 		{4C9FC899-C1E0-4B6D-9796-2AD0B930A492}.Release|x64.Build.0 = Release|x64
 		{4C9FC899-C1E0-4B6D-9796-2AD0B930A492}.Release|x86.ActiveCfg = Release|Win32
 		{4C9FC899-C1E0-4B6D-9796-2AD0B930A492}.Release|x86.Build.0 = Release|Win32
+		{842459D0-FA73-4806-AAD7-034C85EB3643}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{842459D0-FA73-4806-AAD7-034C85EB3643}.Debug|x64.ActiveCfg = Debug|x64
+		{842459D0-FA73-4806-AAD7-034C85EB3643}.Debug|x64.Build.0 = Debug|x64
+		{842459D0-FA73-4806-AAD7-034C85EB3643}.Debug|x86.ActiveCfg = Debug|Win32
+		{842459D0-FA73-4806-AAD7-034C85EB3643}.Debug|x86.Build.0 = Debug|Win32
+		{842459D0-FA73-4806-AAD7-034C85EB3643}.Release|Any CPU.ActiveCfg = Release|Win32
+		{842459D0-FA73-4806-AAD7-034C85EB3643}.Release|x64.ActiveCfg = Release|x64
+		{842459D0-FA73-4806-AAD7-034C85EB3643}.Release|x64.Build.0 = Release|x64
+		{842459D0-FA73-4806-AAD7-034C85EB3643}.Release|x86.ActiveCfg = Release|Win32
+		{842459D0-FA73-4806-AAD7-034C85EB3643}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
